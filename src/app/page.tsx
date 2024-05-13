@@ -12,14 +12,28 @@ interface PageProps {
   }
 }
 
-export default async function Home({ searchParams: {q, type, location, remote} }: PageProps) {
+function getTitle({ q, type, location, remote }: PageProps["searchParams"]) {
+  const titlePrefix = q
+    ? `${q} jobs`
+    : type
+      ? `${type} Deleveloper jobs`
+      : remote
+        ? "Remote developer jobs"
+        : "All developer jobs";
+
+        const titleSuffix = location ? ` in ${location}` : "";
+
+        return `${titlePrefix}${titleSuffix}`;
+}
+
+export default async function Home({ searchParams: { q, type, location, remote } }: PageProps) {
   const filterValues: JobFilterValues = {
     q,
     type,
     location,
     remote: remote === "true",
   }
-  
+
   return (
     <main className="max-w-5xl mx-auto px-3 my-10 space-y-10">
       <div className="space-y-5 text-center">

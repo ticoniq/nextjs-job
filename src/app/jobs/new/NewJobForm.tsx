@@ -8,6 +8,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import Select from "@/components/ui/select";
 import { jobTypes, locationTypes } from "@/lib/job-types";
+import LocationInput from "@/components/LocationInput";
+import { X } from "lucide-react";
+import { Label } from "@radix-ui/react-label";
+import RichTextEditor from "@/components/RichTextEditor";
+import { draftToMarkdown } from "markdown-draft-js";
+import LoadingButton from "@/components/LoadingButton";
 
 export default function Page() {
   const form = useForm<CreateJobValues>({
@@ -125,7 +131,16 @@ export default function Page() {
                 <FormItem>
                   <FormLabel>Location</FormLabel>
                   <FormControl>
-                    <Select {...field} defaultValue="">
+                    <Select
+                      {...field}
+                      defaultValue=""
+                      onChange={(e) => {
+                        field.onChange(e);
+                        if (e.currentTarget.value === "Remote") {
+                          trigger("location");
+                        }
+                      }}
+                    >
                       <option value="" hidden>
                         Select an option
                       </option>
@@ -140,6 +155,121 @@ export default function Page() {
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Office Location</FormLabel>
+                  <FormControl>
+                    <LocationInput
+                      onLocationSelected={field.onChange}
+                      ref={field.ref}
+                    />
+                  </FormControl>
+                  {watch("location") && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        className="text-primary-500"
+                        onClick={() => {
+                          setValue("location", "", { shouldValidate: true });
+                        }}
+                      >
+                        <X size={20} />
+                      </button>
+                      <FormDescription>{watch("location")}.</FormDescription>
+                    </div>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="space-y-2">
+              <Label htmlFor="applicationEmail">How to apply</Label>
+              <div className="flex justify-between">
+                <FormField
+                  control={control}
+                  name="applicationEmail"
+                  render={({ field }) => (
+                    <FormItem className="grow">
+                      <FormControl>
+                        <div className="flex items-center">
+                          <Input
+                            id="applicationEmail"
+                            placeholder="Email"
+                            type="email"
+                            {...field}
+                          />
+                          <span className="mx-2">or</span>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={control}
+                  name="applicationUrl"
+                  render={({ field }) => (
+                    <FormItem className="grow">
+                      <FormControl>
+                        <Input
+                          placeholder="Website"
+                          type="url"
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            trigger("applicationEmail");
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <FormField
+              control={control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <Label onClick={() => setFocus("description")}>
+                    Description
+                  </Label>
+                  <FormControl>
+                    <RichTextEditor
+                      onChange={(draft) =>
+                        field.onChange(draftToMarkdown(draft))
+                      }
+                      ref={field.ref}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={control}
+              name="salary"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Salary</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="number" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <LoadingButton type="submit" loading={isSubmitting}>
+              Submit
+            </LoadingButton>
           </form>
         </Form>
       </div>

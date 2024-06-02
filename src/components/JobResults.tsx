@@ -1,8 +1,8 @@
 import prisma from "@/lib/prisma";
 import { JobFilterValues } from "@/lib/validation";
 import { Prisma } from "@prisma/client";
-import JobListItem from "./JobListItem";
 import Link from "next/link";
+import JobListItem from "./JobListItem";
 
 interface JobResultsProps {
   filterValues: JobFilterValues;
@@ -16,18 +16,17 @@ export default async function JobResults({
     .filter((word) => word.length > 0)
     .join(" & ");
 
-  const searchFilter: Prisma.JobWhereInput = searchString
+    const searchFilter: Prisma.JobWhereInput = searchString
     ? {
-      OR: [
-        { title: { search: searchString } },
-        { companyName: { search: searchString } },
-        { type: { search: searchString } },
-        { locationType: { search: searchString } },
-        { location: { search: searchString } },
-      ],
-    }
+        OR: [
+          { companyName: { contains: searchString } },
+          { type: { contains: searchString } },
+          { locationType: { contains: searchString } },
+          { location: { contains: searchString } },
+        ],
+      }
     : {};
-
+  
   const where: Prisma.JobWhereInput = {
     AND: [
       searchFilter,

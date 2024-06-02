@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formateMoney(amount: number) {
+export function formatMoney(amount: number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -15,4 +15,11 @@ export function formateMoney(amount: number) {
 
 export  function relativeDate(from: Date) {
   return formatDistanceToNowStrict(new Date(from), { addSuffix: true });
+}
+
+export function toSlug(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/ /g, "-")
+    .replace(/[^\w-]+/g, "");
 }

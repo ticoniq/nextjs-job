@@ -1,33 +1,36 @@
-import { JobFilterValues } from "@/lib/validation";
-import JobListItem from "./JobListItem";
 import prisma from "@/lib/prisma";
+import { JobFilterValues } from "@/lib/validation";
 import { Prisma } from "@prisma/client";
+import JobListItem from "./JobListItem";
+import Link from "next/link";
 
 interface JobResultsProps {
-  filterValues: JobFilterValues,
+  filterValues: JobFilterValues;
 }
 
-export async function JobResults({
+export default async function JobResults({
   filterValues: { q, type, location, remote },
 }: JobResultsProps) {
-  const searchStrings = q
+  const searchString = q
     ?.split(" ")
-    .filter(word => word.length > 0)
+    .filter((word) => word.length > 0)
     .join(" & ");
 
-  const searchFliter: Prisma.JobWhereInput = searchStrings ? {
-    OR: [
-      { title: { search: searchStrings } },
-      { companyName: { search: searchStrings } },
-      { type: { search: searchStrings } },
-      { locationType: { search: searchStrings } },
-      { location: { search: searchStrings } },
-    ],
-  } : {};
+  const searchFilter: Prisma.JobWhereInput = searchString
+    ? {
+      OR: [
+        { title: { search: searchString } },
+        { companyName: { search: searchString } },
+        { type: { search: searchString } },
+        { locationType: { search: searchString } },
+        { location: { search: searchString } },
+      ],
+    }
+    : {};
 
   const where: Prisma.JobWhereInput = {
     AND: [
-      searchFliter,
+      searchFilter,
       type ? { type } : {},
       location ? { location } : {},
       remote ? { locationType: "Remote" } : {},
@@ -37,22 +40,21 @@ export async function JobResults({
 
   const jobs = await prisma.job.findMany({
     where,
-    orderBy: { createdAt: 'desc' },
-  })
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
-    <div className="space-y-4 grow">
+    <div className="grow space-y-4">
       {jobs.map((job) => (
-        <JobListItem
-          job={job}
-          key={job.id}
-        />
+        <Link key={job.id} href={`/jobs/${job.slug}`} className="block">
+          <JobListItem job={job} />
+        </Link>
       ))}
       {jobs.length === 0 && (
-        <p className="text-muted-foreground text-center m-auto">
-          No jobs found
+        <p className="m-auto text-center">
+          No jobs found. Try adjusting your search filters.
         </p>
       )}
     </div>
-  )
+  );
 }
